@@ -48,7 +48,7 @@ export interface TransferFormData {
 }
 
 // Replace with your deployed contract address
-const CONTRACT_ADDRESS = "0x1234567890123456789012345678901234567890"; 
+const CONTRACT_ADDRESS = "0xd9145CCE52D386f254917e481eB44e9943F39138"; 
 
 export default function Home() {
   const [error, setError] = useState<string | null>(null);
