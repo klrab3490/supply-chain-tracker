@@ -1,0 +1,66 @@
+[
+    {
+        "inputs": [
+            {"name": "productId", "type": "string"},
+            {"name": "name", "type": "string"},
+            {"name": "manufacturer", "type": "string"},
+            {"name": "location", "type": "string"}
+        ],
+        "name": "registerProduct",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "inputs": [
+            {"name": "productId", "type": "string"},
+            {"name": "toAddress", "type": "address"},
+            {"name": "fromLocation", "type": "string"},
+            {"name": "toLocation", "type": "string"},
+            {"name": "notes", "type": "string"}
+        ],
+        "name": "transferProduct",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }, {
+        "inputs": [
+            {"name": "productId", "type": "string"}
+        ],
+        "name": "verifyProduct",
+        "outputs": [{"name": "", "type": "bool"}],
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "inputs": [
+            {"name": "productId", "type": "string"}
+        ],
+        "name": "getProductInfo",
+        "outputs": [
+            {"name": "productId", "type": "string"},
+            {"name": "name", "type": "string"},
+            {"name": "manufacturer", "type": "string"},
+            {"name": "manufactureDate", "type": "uint256"},
+            {"name": "currentCustodian", "type": "address"},
+            {"name": "currentLocation", "type": "string"},
+            {"name": "transferCount", "type": "uint256"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }, {
+        "inputs": [
+            {"name": "productId", "type": "string"},
+            {"name": "index", "type": "uint256"}
+        ],
+        "name": "getTransferEvent",
+        "outputs": [
+            {"name": "from", "type": "address"},
+            {"name": "to", "type": "address"},
+            {"name": "fromLocation", "type": "string"},
+            {"name": "toLocation", "type": "string"},
+            {"name": "timestamp", "type": "uint256"},
+            {"name": "notes", "type": "string"}
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+]
