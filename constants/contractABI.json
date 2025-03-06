@@ -1,66 +1,272 @@
 [
-    {
-        "inputs": [
-            {"name": "productId", "type": "string"},
-            {"name": "name", "type": "string"},
-            {"name": "manufacturer", "type": "string"},
-            {"name": "location", "type": "string"}
-        ],
-        "name": "registerProduct",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    }, {
-        "inputs": [
-            {"name": "productId", "type": "string"},
-            {"name": "toAddress", "type": "address"},
-            {"name": "fromLocation", "type": "string"},
-            {"name": "toLocation", "type": "string"},
-            {"name": "notes", "type": "string"}
-        ],
-        "name": "transferProduct",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    }, {
-        "inputs": [
-            {"name": "productId", "type": "string"}
-        ],
-        "name": "verifyProduct",
-        "outputs": [{"name": "", "type": "bool"}],
-        "stateMutability": "view",
-        "type": "function"
-    }, {
-        "inputs": [
-            {"name": "productId", "type": "string"}
-        ],
-        "name": "getProductInfo",
-        "outputs": [
-            {"name": "productId", "type": "string"},
-            {"name": "name", "type": "string"},
-            {"name": "manufacturer", "type": "string"},
-            {"name": "manufactureDate", "type": "uint256"},
-            {"name": "currentCustodian", "type": "address"},
-            {"name": "currentLocation", "type": "string"},
-            {"name": "transferCount", "type": "uint256"}
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    }, {
-        "inputs": [
-            {"name": "productId", "type": "string"},
-            {"name": "index", "type": "uint256"}
-        ],
-        "name": "getTransferEvent",
-        "outputs": [
-            {"name": "from", "type": "address"},
-            {"name": "to", "type": "address"},
-            {"name": "fromLocation", "type": "string"},
-            {"name": "toLocation", "type": "string"},
-            {"name": "timestamp", "type": "uint256"},
-            {"name": "notes", "type": "string"}
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    }
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "productId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "manufacturer",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "custodian",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "ProductRegistered",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "productId",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "fromLocation",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "toLocation",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "notes",
+				"type": "string"
+			}
+		],
+		"name": "ProductTransferred",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "productId",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "manufacturer",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "location",
+				"type": "string"
+			}
+		],
+		"name": "registerProduct",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "productId",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "toAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "fromLocation",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "toLocation",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "notes",
+				"type": "string"
+			}
+		],
+		"name": "transferProduct",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "productId",
+				"type": "string"
+			}
+		],
+		"name": "getProductInfo",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "productId",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "getTransferEvent",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "productId",
+				"type": "string"
+			}
+		],
+		"name": "verifyProduct",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
 ]
