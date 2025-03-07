@@ -96,7 +96,7 @@ export default function ProductTransfer({ onTransfer, isLoading }: ProductTransf
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className='mt-2'>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

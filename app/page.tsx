@@ -49,7 +49,7 @@ export interface TransferFormData {
 }
 
 // Replace with your deployed contract address
-const CONTRACT_ADDRESS = "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee"; 
+const CONTRACT_ADDRESS = "0xb763d85B335A86cAe3403B4825B830Aee71dba58"; 
 
 export default function Home() {
   const [isAdmin, setAdmin] = useState<boolean>(false);
@@ -132,7 +132,6 @@ export default function Home() {
     }
   };
   
-
   const fetchProducts = async () => {
     setIsLoading(true);
     setError(null);
@@ -141,13 +140,17 @@ export default function Home() {
     try {
       if (!contract) throw new Error("Contract not initialized");
 
-      const products = await contract.getProducts(); // Fetch products
+      const productsRaw = await contract.getAllProducts(); // Fetch products
 
-      if (!Array.isArray(products)) {
-          throw new Error("Invalid product data received");
-      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = productsRaw.map((product: Array<any>) => ({
+        productId: product[0],
+        name: product[1],
+        manufacturer: product[2],
+        currentCustodian: product[3],
+      })); // Format products
 
-      setProducts(products); // Correctly set state
+      setProducts(data); // Correctly set state
       setSuccessMessage("Products fetched successfully");
 
     } catch (error: unknown) {
@@ -170,7 +173,7 @@ export default function Home() {
       const signer = provider.getSigner();
       const connectedContract = contract.connect(signer);
       
-      const tx = await connectedContract.addProduct(
+      const tx = await connectedContract.registerProduct(
         productData.productId,
         productData.name,
         productData.manufacturer,
@@ -197,12 +200,10 @@ export default function Home() {
       const signer = provider.getSigner();
       const connectedContract = contract.connect(signer);
       
-      const tx = await connectedContract.transferProduct(
+      const tx = await connectedContract.transferCustodian(
         transferData.productId,
         transferData.toAddress,
-        transferData.fromLocation,
-        transferData.toLocation,
-        transferData.notes
+        transferData.toLocation
       );
       
       await tx.wait();
@@ -224,7 +225,7 @@ export default function Home() {
       if (!contract) throw new Error("Contract not initialized");
 
       // Fetch product details
-      const productInfo = await contract.getProduct(productId);
+      const productInfo = await contract.getProductById(productId);
       
       const formattedProduct: ProductType = {
         productId: productInfo.productId,
