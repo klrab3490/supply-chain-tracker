@@ -10,6 +10,7 @@ import ProductRegistration from '@/components/ProductRegistration';
 import ProductVerification from '@/components/ProductVerification'; 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // Type definitions
 export interface ProductType {
@@ -48,12 +49,14 @@ export interface TransferFormData {
 }
 
 // Replace with your deployed contract address
-const CONTRACT_ADDRESS = "0x742c93bb4b2b4ce6d371adf1a12ff12e054aafee"; 
+const CONTRACT_ADDRESS = "0xD4Fc541236927E2EAf8F27606bD7309C1Fc2cbee"; 
 
 export default function Home() {
+  const [isAdmin, setAdmin] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [account, setAccount] = useState<string | null>(null);
+  const [products, setProducts] = useState<ProductType[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [contract, setContract] = useState<ethers.Contract | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -98,7 +101,11 @@ export default function Home() {
         if (provider) {
           const accounts = await provider.listAccounts();
           setAccount(accounts[0]);
+          console.log("Connected account:", accounts[0]);
           setIsConnected(true);
+          if (accounts[0] === "0x63Fd440E5a0b48E2515765b857C6e35544C8F573") {
+            setAdmin(true);
+          }
         }
       } else {
         setError("MetaMask is not installed");
@@ -109,6 +116,48 @@ export default function Home() {
       setIsLoading(false);
     }
   };
+
+  const disconnectWallet = async () => {
+    setIsLoading(true);
+    setError(null);
+  
+    try {
+      setAccount(null);
+      setIsConnected(false);
+      setAdmin(false); // Reset admin state if applicable
+    } catch (error: unknown) {
+      setError("Failed to disconnect wallet: " + (error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+  
+    try {
+      if (!contract) throw new Error("Contract not initialized");
+
+      const products = await contract.getProducts(); // Fetch products
+
+      if (!Array.isArray(products)) {
+          throw new Error("Invalid product data received");
+      }
+
+      setProducts(products); // Correctly set state
+      setSuccessMessage("Products fetched successfully");
+
+    } catch (error: unknown) {
+      console.error("Error fetching products:", error);
+      setError("Fetching products failed: " + (error as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
   const registerProduct = async (productData: ProductFormData) => {
     setIsLoading(true);
@@ -121,7 +170,7 @@ export default function Home() {
       const signer = provider.getSigner();
       const connectedContract = contract.connect(signer);
       
-      const tx = await connectedContract.registerProduct(
+      const tx = await connectedContract.addProduct(
         productData.productId,
         productData.name,
         productData.manufacturer,
@@ -173,46 +222,53 @@ export default function Home() {
     
     try {
       if (!contract) throw new Error("Contract not initialized");
+
+      // Fetch product details
+      const productInfo = await contract.getProduct(productId);
       
-      const isAuthentic = await contract.verifyProduct(productId);
-      
-      if (isAuthentic) {
-        const productInfo = await contract.getProductInfo(productId);
-        const formattedProduct: ProductType = {
-          productId: productInfo.productId,
-          name: productInfo.name,
-          manufacturer: productInfo.manufacturer,
-          manufactureDate: new Date(productInfo.manufactureDate.toNumber() * 1000).toLocaleString(),
-          currentCustodian: productInfo.currentCustodian,
-          currentLocation: productInfo.currentLocation,
-          transferCount: productInfo.transferCount.toNumber(),
-          history: []
-        };
-        
-        // Get transfer history
+      const formattedProduct: ProductType = {
+        productId: productInfo.productId,
+        name: productInfo.name,
+        manufacturer: productInfo.manufacturer,
+        manufactureDate: productInfo.manufactureDate
+          ? new Date(productInfo.manufactureDate.toNumber() * 1000).toLocaleString()
+          : "N/A",
+        currentCustodian: productInfo.currentCustodian,
+        currentLocation: productInfo.currentLocation,
+        transferCount: productInfo.transferCount ? productInfo.transferCount.toNumber() : 0,
+        history: []
+      };
+
+      // 🔴 Note: `getTransferEvent` is not defined in your Solidity contract
+      // You'll need to replace this with fetching event logs using web3
+      if (formattedProduct.transferCount > 0) {
         for (let i = 0; i < formattedProduct.transferCount; i++) {
-          const transferEvent = await contract.getTransferEvent(productId, i);
-          formattedProduct.history.push({
-            from: transferEvent.from,
-            to: transferEvent.to,
-            fromLocation: transferEvent.fromLocation,
-            toLocation: transferEvent.toLocation,
-            timestamp: new Date(transferEvent.timestamp.toNumber() * 1000).toLocaleString(),
-            notes: transferEvent.notes
-          });
+          try {
+            const transferEvent = await contract.getTransferEvent(productId, i);
+            formattedProduct.history.push({
+              from: transferEvent.from,
+              to: transferEvent.to,
+              fromLocation: transferEvent.fromLocation,
+              toLocation: transferEvent.toLocation,
+              timestamp: new Date(transferEvent.timestamp.toNumber() * 1000).toLocaleString(),
+              notes: transferEvent.notes
+            });
+          } catch (error) {
+            console.warn(`Failed to fetch transfer event ${i}:`, error);
+          }
         }
-        
-        setProductDetails(formattedProduct);
-        setSuccessMessage("Product verification successful!");
-      } else {
-        setError("Product not found or not authentic");
       }
+      
+      setProductDetails(formattedProduct);
+      setSuccessMessage("Product verification successful!");
+      
     } catch (error: unknown) {
       setError("Verification failed: " + (error as Error).message);
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -223,6 +279,7 @@ export default function Home() {
             isConnected={isConnected} 
             account={account} 
             connectWallet={connectWallet}
+            disconnectWallet={disconnectWallet}
             isLoading={isLoading}
           />
         </div>
@@ -244,10 +301,13 @@ export default function Home() {
         )}
 
         <Tabs defaultValue="verify" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className={`grid w-full mb-8 ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
             <TabsTrigger value="verify">Verify Product</TabsTrigger>
             <TabsTrigger value="register" disabled={!isConnected}>Register Product</TabsTrigger>
             <TabsTrigger value="transfer" disabled={!isConnected}>Transfer Product</TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="admin" onClick={fetchProducts}>Admin</TabsTrigger>
+            )}
           </TabsList>
           
           <TabsContent value="verify">
@@ -274,6 +334,29 @@ export default function Home() {
               isLoading={isLoading}
               account={account}
             />
+          </TabsContent>
+
+          <TabsContent value="admin">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Manufacturer</TableHead>
+                  <TableHead>Current Custodian</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product: ProductType, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell>{product.productId}</TableCell>
+                    <TableCell>{product.name}</TableCell>
+                    <TableCell>{product.manufacturer}</TableCell>
+                    <TableCell>{product.currentCustodian}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </TabsContent>
         </Tabs>
       </main>

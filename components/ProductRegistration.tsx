@@ -72,7 +72,7 @@ export default function ProductRegistration({ onRegister, isLoading }: ProductRe
               required
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 mb-2">
             <Label htmlFor="location">Current Location</Label>
             <Input
               id="location"
